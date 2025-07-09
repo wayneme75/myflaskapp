@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  namespace: helloworld  # Change to your desired namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helloworld
+  template:
+    metadata:
+      labels:
+        app: helloworld
+    spec:
+      containers:
+      - name: helloworld
+        image: cruxreg2.azurecr.us/crux-hello-world:latest
+        workingDir: /crux-hello-world
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: app-storage
+          mountPath: /data
+        env:
+        - name: FLASK_APP
+          value: "app.py"          # or your actual Python filename
+        - name: FLASK_ENV
+          value: "production"
+        command: ["python3"]
+        args: ["-m", "flask", "run", "--host=0.0.0.0"]
+      volumes:
+      - name: app-storage
+        persistentVolumeClaim:
+          claimName: helloworld-pvc
